@@ -4,6 +4,22 @@ import Link from "next/link";
 import { LanguageSwitcher } from "./components/language-switcher";
 import { useLanguage, type LanguageCode } from "./components/language-provider";
 
+const courtContacts: Record<string, string> = {
+  "Bonifacio Global City Hoops": "+63 917 555 0101 · Messenger: BGC Hoops",
+  "Rizal Park Open Court": "Manila Parks Desk · +63 2 8527 1217",
+  "Cebu City Sports Center": "+63 32 254 8567 · sportscenter@cebucity.gov.ph",
+  "Davao People's Court": "Barangay Poblacion Desk · +63 82 227 3126",
+  "Dasmariñas Hoops Arena": "+63 917 555 0414 · Messenger: Dasma Hoops",
+  "Bacoor Community Court": "Bacoor Sports Office · +63 46 481 4100",
+  "Barangay Covered Court": "Barangay Hall / SK Sports Coordinator",
+};
+
+function googleMapsSearchUrl(name: string, location: string) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${name} ${location} Philippines`,
+  )}`;
+}
+
 const copy = {
   "zh-CN": {
     navSubtitle: "菲律宾篮球社区",
@@ -36,6 +52,8 @@ const copy = {
     courtsTitle: "免费 / 收费球馆列表",
     free: "免费",
     paid: "收费",
+    contactLabel: "联系方式",
+    mapsLabel: "Google 地图",
     communityLabel: "社区动态",
     communityTitle: "社区帖子",
     communityDescription:
@@ -156,6 +174,8 @@ const copy = {
     courtsTitle: "Free / Paid Court List",
     free: "Free",
     paid: "Paid",
+    contactLabel: "Contact",
+    mapsLabel: "Google Maps",
     communityLabel: "Community Feed",
     communityTitle: "Community Posts",
     communityDescription:
@@ -276,6 +296,8 @@ const copy = {
     courtsTitle: "Listahan ng Libre / May Bayad na Court",
     free: "Libre",
     paid: "May bayad",
+    contactLabel: "Contact",
+    mapsLabel: "Google Maps",
     communityLabel: "Community Feed",
     communityTitle: "Mga Post ng Komunidad",
     communityDescription:
@@ -610,6 +632,22 @@ export function HomeContent() {
                   {court.price}
                 </p>
               </div>
+              <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                  {c.contactLabel}
+                </p>
+                <p className="mt-1 text-sm font-bold text-slate-200">
+                  {courtContacts[court.name]}
+                </p>
+              </div>
+              <a
+                href={googleMapsSearchUrl(court.name, court.location)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex rounded-full border border-orange-300/40 bg-orange-300/10 px-4 py-2 text-sm font-black text-orange-200 transition hover:bg-orange-300 hover:text-black"
+              >
+                {c.mapsLabel}
+              </a>
               <div className="mt-5 flex flex-wrap gap-2">
                 {court.tags.map((tag) => (
                   <span

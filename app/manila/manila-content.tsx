@@ -4,6 +4,19 @@ import Link from "next/link";
 import { LanguageSwitcher } from "../components/language-switcher";
 import { useLanguage, type LanguageCode } from "../components/language-provider";
 
+const manilaCourtContacts: Record<string, string> = {
+  "Rizal Park Open Court": "Manila Parks Desk · +63 2 8527 1217",
+  "San Andres Sports Complex": "+63 2 8567 4502 · sports@manila.gov.ph",
+  "Tondo Community Court": "Tondo Barangay Sports Desk · +63 917 555 0911",
+  "Sampaloc Training Gym": "+63 917 555 1042 · Messenger: Sampaloc Training Gym",
+};
+
+function googleMapsSearchUrl(name: string, area: string) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${name} ${area} Manila Philippines`,
+  )}`;
+}
+
 const copy = {
   "zh-CN": {
     navSubtitle: "Manila 城市页",
@@ -28,6 +41,8 @@ const copy = {
     free: "免费",
     paid: "收费",
     bestTime: "最佳时间：",
+    contactLabel: "联系方式",
+    mapsLabel: "Google 地图",
     runsLabel: "Manila 约战",
     runsTitle: "今日约战",
     runsDescription:
@@ -139,6 +154,8 @@ const copy = {
     free: "Free",
     paid: "Paid",
     bestTime: "Best time: ",
+    contactLabel: "Contact",
+    mapsLabel: "Google Maps",
     runsLabel: "Manila Runs",
     runsTitle: "Today's Runs",
     runsDescription:
@@ -250,6 +267,8 @@ const copy = {
     free: "Libre",
     paid: "May bayad",
     bestTime: "Pinakamagandang oras: ",
+    contactLabel: "Contact",
+    mapsLabel: "Google Maps",
     runsLabel: "Manila Runs",
     runsTitle: "Mga Laro Ngayon",
     runsDescription:
@@ -531,6 +550,22 @@ export function ManilaContent() {
                 {c.bestTime}
                 {court.bestTime}
               </div>
+              <div className="mt-3 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">
+                  {c.contactLabel}
+                </p>
+                <p className="mt-1 text-sm font-bold text-slate-200">
+                  {manilaCourtContacts[court.name]}
+                </p>
+              </div>
+              <a
+                href={googleMapsSearchUrl(court.name, court.area)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex rounded-full border border-orange-300/40 bg-orange-300/10 px-4 py-2 text-sm font-black text-orange-200 transition hover:bg-orange-300 hover:text-black"
+              >
+                {c.mapsLabel}
+              </a>
             </article>
           ))}
         </div>
