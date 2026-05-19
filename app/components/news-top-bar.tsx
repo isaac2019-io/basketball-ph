@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useLanguage, type LanguageCode } from "./language-provider";
 import { formatRelativeTime } from "./posts-store";
 import type { NbaNewsItem } from "../lib/nba-news";
@@ -33,13 +34,13 @@ export function NewsTopBar({ news }: { news: NbaNewsItem[] }) {
   return (
     <div className="sticky top-0 z-40 border-b border-white/5 bg-[#05060a]/95 backdrop-blur supports-[backdrop-filter]:bg-[#05060a]/80">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-5 py-2 sm:px-8 lg:px-12">
-        <a
-          href="#news"
+        <Link
+          href="/news"
           className="flex shrink-0 items-center gap-2 rounded-full bg-orange-500/15 px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-orange-300 transition hover:bg-orange-500/25"
         >
           <span className="size-1.5 animate-pulse rounded-full bg-orange-400" />
           {l.tag}
-        </a>
+        </Link>
 
         {top.length > 0 ? (
           <>
@@ -61,12 +62,12 @@ export function NewsTopBar({ news }: { news: NbaNewsItem[] }) {
                 </a>
               ))}
             </div>
-            <a
-              href="#news"
+            <Link
+              href="/news"
               className="hidden shrink-0 text-xs font-black text-orange-300 hover:text-orange-200 sm:inline"
             >
               {l.viewAll} →
-            </a>
+            </Link>
           </>
         ) : (
           <p className="text-xs text-slate-500">{l.empty}</p>

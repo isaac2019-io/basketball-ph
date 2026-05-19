@@ -456,9 +456,9 @@ export function HomeContent({ news }: { news: NbaNewsItem[] }) {
             <a href="#courts" className="hover:text-orange-300">
               {c.navCourts}
             </a>
-            <a href="#news" className="hover:text-orange-300">
+            <Link href="/news" className="hover:text-orange-300">
               {c.navNews}
-            </a>
+            </Link>
             <a href="#community" className="hover:text-orange-300">
               {c.navCommunity}
             </a>
@@ -706,61 +706,6 @@ export function HomeContent({ news }: { news: NbaNewsItem[] }) {
               </div>
             </article>
           ))}
-        </div>
-      </section>
-
-      <section
-        id="news"
-        className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-12"
-      >
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.32em] text-orange-300">
-              {c.newsLabel}
-            </p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
-              {c.newsTitle}
-            </h2>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">
-              {c.newsDescription}
-            </p>
-          </div>
-          <p className="text-sm font-bold text-slate-400">{c.newsSource}</p>
-        </div>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {news.length > 0 ? (
-            news.map((item) => (
-              <article
-                key={item.id}
-                className="flex h-full flex-col rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-5 transition hover:-translate-y-1 hover:border-orange-300/50 hover:bg-white/[0.08]"
-              >
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">
-                  {formatRelativeTime(item.pubDate, language)}
-                </p>
-                <h3 className="mt-3 text-lg font-black leading-snug">
-                  {item.title}
-                </h3>
-                {item.description && (
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300">
-                    {item.description}
-                  </p>
-                )}
-                <a
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto inline-flex pt-4 text-sm font-black text-orange-300 hover:text-orange-200"
-                >
-                  {c.readMore} →
-                </a>
-              </article>
-            ))
-          ) : (
-            <p className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-center text-slate-400 md:col-span-2 lg:col-span-3">
-              {c.noNewsYet}
-            </p>
-          )}
         </div>
       </section>
 
