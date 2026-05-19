@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { LanguageSwitcher } from "../components/language-switcher";
 import { useLanguage, type LanguageCode } from "../components/language-provider";
+import { SettingsMenu } from "../components/settings-menu";
 
 const manilaCourtContacts: Record<string, string> = {
   "Rizal Park Open Court": "Manila Parks Desk · +63 2 8527 1217",
@@ -391,13 +391,13 @@ export function ManilaContent() {
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
             <Link
               href="/"
               className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-orange-300"
             >
               {c.backHome}
             </Link>
+            <SettingsMenu />
           </div>
         </nav>
 

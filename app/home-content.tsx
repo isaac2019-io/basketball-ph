@@ -1,8 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { LanguageSwitcher } from "./components/language-switcher";
 import { useLanguage, type LanguageCode } from "./components/language-provider";
+import { NewsAutoRefresh } from "./components/news-auto-refresh";
+import { NewsTopBar } from "./components/news-top-bar";
+import { PostForm } from "./components/post-form";
+import { usePosts, formatRelativeTime } from "./components/posts-store";
+import { SettingsMenu } from "./components/settings-menu";
+import type { NbaNewsItem } from "./lib/nba-news";
 
 const courtContacts: Record<string, string> = {
   "Bonifacio Global City Hoops": "+63 917 555 0101 · Messenger: BGC Hoops",
@@ -26,6 +32,7 @@ const copy = {
     navManila: "Manila",
     navMap: "地图",
     navCourts: "球馆",
+    navNews: "NBA 新闻",
     navCommunity: "社区",
     postCta: "发帖约球",
     eyebrow: "Manila 到 Davao，找到下一场球",
@@ -59,6 +66,13 @@ const copy = {
     communityDescription:
       "发布约战、找队友、分享球馆情报。移动端优先设计，手机上也能快速看帖和加入球局。",
     newPost: "发布新帖子",
+    noPostsYet: "暂无帖子，第一个来发起约战吧",
+    newsLabel: "NBA 每日资讯",
+    newsTitle: "每日 NBA 头条",
+    newsDescription: "每天聚合 NBA 头条新闻，菲律宾球迷一站掌握主场动态。",
+    newsSource: "来源：ESPN",
+    readMore: "查看原文",
+    noNewsYet: "今天暂无最新资讯，请稍后再来。",
     postTagRun: "约战",
     postTagCourt: "球馆情报",
     stats: [
@@ -148,6 +162,7 @@ const copy = {
     navManila: "Manila",
     navMap: "Map",
     navCourts: "Courts",
+    navNews: "NBA News",
     navCommunity: "Community",
     postCta: "Post a Run",
     eyebrow: "Find your next run from Manila to Davao",
@@ -181,6 +196,14 @@ const copy = {
     communityDescription:
       "Post runs, find teammates, and share court intel. The mobile-first layout keeps it easy to read posts and join games on your phone.",
     newPost: "Create Post",
+    noPostsYet: "No posts yet — be the first to share a run",
+    newsLabel: "NBA Daily Headlines",
+    newsTitle: "Daily NBA News",
+    newsDescription:
+      "Daily NBA headlines aggregated for Philippine hoop fans — never miss a storyline.",
+    newsSource: "Source: ESPN",
+    readMore: "Read more",
+    noNewsYet: "No fresh headlines right now. Please check back later.",
     postTagRun: "Pickup",
     postTagCourt: "Court Intel",
     stats: [
@@ -270,6 +293,7 @@ const copy = {
     navManila: "Manila",
     navMap: "Mapa",
     navCourts: "Mga court",
+    navNews: "NBA News",
     navCommunity: "Komunidad",
     postCta: "Mag-post ng laro",
     eyebrow: "Hanapin ang susunod mong laro mula Manila hanggang Davao",
@@ -303,6 +327,14 @@ const copy = {
     communityDescription:
       "Mag-post ng laro, maghanap ng kakampi, at magbahagi ng impormasyon sa court. Mobile-first ang layout para madaling magbasa at sumali gamit ang phone.",
     newPost: "Gumawa ng post",
+    noPostsYet: "Wala pang post — ikaw ang mauna mag-post",
+    newsLabel: "Araw-araw NBA Headlines",
+    newsTitle: "NBA Updates Araw-araw",
+    newsDescription:
+      "Araw-araw na NBA headlines para sa Pilipinong hoop fans — laging updated.",
+    newsSource: "Pinagmulan: ESPN",
+    readMore: "Basahin",
+    noNewsYet: "Wala pang balita ngayon. Bumalik mamaya.",
     postTagRun: "Pickup",
     postTagCourt: "Court intel",
     stats: [
@@ -389,12 +421,15 @@ const copy = {
   },
 } satisfies Record<LanguageCode, object>;
 
-export function HomeContent() {
+export function HomeContent({ news }: { news: NbaNewsItem[] }) {
   const { language } = useLanguage();
   const c = copy[language] as (typeof copy)["zh-CN"];
+  const { posts } = usePosts();
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#05060a] text-white">
+      <NewsTopBar news={news} />
       <section className="relative isolate px-5 py-6 sm:px-8 lg:px-12">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(245,96,32,0.32),transparent_30%),radial-gradient(circle_at_80%_0%,rgba(29,78,216,0.35),transparent_24%),linear-gradient(135deg,#05060a_0%,#101524_46%,#05060a_100%)]" />
         <div className="absolute left-1/2 top-0 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-orange-500/10 blur-3xl" />
@@ -421,18 +456,21 @@ export function HomeContent() {
             <a href="#courts" className="hover:text-orange-300">
               {c.navCourts}
             </a>
+            <a href="#news" className="hover:text-orange-300">
+              {c.navNews}
+            </a>
             <a href="#community" className="hover:text-orange-300">
               {c.navCommunity}
             </a>
           </div>
           <div className="flex items-center gap-2">
-            <LanguageSwitcher />
             <a
               href="#community"
               className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-orange-300"
             >
               {c.postCta}
             </a>
+            <SettingsMenu />
           </div>
         </nav>
 
@@ -497,22 +535,30 @@ export function HomeContent() {
                 {c.pickupBoard}
               </p>
               <div className="mt-5 space-y-4">
-                {c.posts.slice(0, 2).map((post) => (
-                  <article
-                    key={post.title}
-                    className="rounded-3xl border border-white/10 bg-white/[0.06] p-5"
-                  >
-                    <div className="mb-4 flex items-center justify-between">
-                      <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-bold text-orange-200">
-                        @{post.author}
-                      </span>
-                      <span className="text-xs text-slate-500">{post.meta}</span>
-                    </div>
-                    <h2 className="text-xl font-black leading-snug">
-                      {post.title}
-                    </h2>
-                  </article>
-                ))}
+                {posts.length > 0 ? (
+                  posts.slice(0, 2).map((post) => (
+                    <article
+                      key={post.id}
+                      className="rounded-3xl border border-white/10 bg-white/[0.06] p-5"
+                    >
+                      <div className="mb-4 flex items-center justify-between">
+                        <span className="rounded-full bg-orange-500/15 px-3 py-1 text-xs font-bold text-orange-200">
+                          @{post.author}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {formatRelativeTime(post.createdAt, language)}
+                        </span>
+                      </div>
+                      <h2 className="text-xl font-black leading-snug">
+                        {post.title}
+                      </h2>
+                    </article>
+                  ))
+                ) : (
+                  <p className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-sm text-slate-400">
+                    {c.noPostsYet}
+                  </p>
+                )}
               </div>
               <div className="mt-5 rounded-3xl bg-orange-500 p-5 text-black">
                 <p className="text-sm font-bold uppercase tracking-[0.2em]">
@@ -664,6 +710,61 @@ export function HomeContent() {
       </section>
 
       <section
+        id="news"
+        className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-12"
+      >
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.32em] text-orange-300">
+              {c.newsLabel}
+            </p>
+            <h2 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
+              {c.newsTitle}
+            </h2>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">
+              {c.newsDescription}
+            </p>
+          </div>
+          <p className="text-sm font-bold text-slate-400">{c.newsSource}</p>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {news.length > 0 ? (
+            news.map((item) => (
+              <article
+                key={item.id}
+                className="flex h-full flex-col rounded-[1.75rem] border border-white/10 bg-white/[0.05] p-5 transition hover:-translate-y-1 hover:border-orange-300/50 hover:bg-white/[0.08]"
+              >
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">
+                  {formatRelativeTime(item.pubDate, language)}
+                </p>
+                <h3 className="mt-3 text-lg font-black leading-snug">
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-300">
+                    {item.description}
+                  </p>
+                )}
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto inline-flex pt-4 text-sm font-black text-orange-300 hover:text-orange-200"
+                >
+                  {c.readMore} →
+                </a>
+              </article>
+            ))
+          ) : (
+            <p className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-center text-slate-400 md:col-span-2 lg:col-span-3">
+              {c.noNewsYet}
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section
         id="community"
         className="mx-auto max-w-7xl px-5 py-12 pb-20 sm:px-8 lg:px-12"
       >
@@ -679,35 +780,53 @@ export function HomeContent() {
               <p className="mt-4 text-lg leading-8 text-slate-300">
                 {c.communityDescription}
               </p>
-              <button className="mt-6 rounded-full bg-white px-6 py-3 font-black text-slate-950 transition hover:bg-orange-300">
+              <button
+                type="button"
+                onClick={() => setFormOpen(true)}
+                className="mt-6 rounded-full bg-white px-6 py-3 font-black text-slate-950 transition hover:bg-orange-300"
+              >
                 {c.newPost}
               </button>
             </div>
             <div className="space-y-4">
-              {c.posts.map((post) => (
-                <article
-                  key={post.title}
-                  className="rounded-3xl border border-white/10 bg-black/35 p-5"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <p className="font-black text-orange-200">@{post.author}</p>
-                    <p className="text-xs text-slate-400">{post.meta}</p>
-                  </div>
-                  <h3 className="text-xl font-black leading-snug">{post.title}</h3>
-                  <div className="mt-4 flex gap-2 text-sm font-bold text-slate-300">
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      {c.postTagRun}
-                    </span>
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      {c.postTagCourt}
-                    </span>
-                  </div>
-                </article>
-              ))}
+              {posts.length > 0 ? (
+                posts.map((post) => (
+                  <article
+                    key={post.id}
+                    className="rounded-3xl border border-white/10 bg-black/35 p-5"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <p className="font-black text-orange-200">@{post.author}</p>
+                      <p className="text-xs text-slate-400">
+                        {formatRelativeTime(post.createdAt, language)}
+                      </p>
+                    </div>
+                    <h3 className="text-xl font-black leading-snug">{post.title}</h3>
+                    {post.tags.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2 text-sm font-bold text-slate-300">
+                        {post.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full bg-white/10 px-3 py-1"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </article>
+                ))
+              ) : (
+                <p className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-center text-slate-400">
+                  {c.noPostsYet}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </section>
+      <PostForm open={formOpen} onClose={() => setFormOpen(false)} />
+      <NewsAutoRefresh />
     </main>
   );
 }
